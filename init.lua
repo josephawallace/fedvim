@@ -1,89 +1,3 @@
---[[
-
-=====================================================================
-==================== READ THIS BEFORE CONTINUING ====================
-=====================================================================
-========                                    .-----.          ========
-========         .----------------------.   | === |          ========
-========         |.-""""""""""""""""""-.|   |-----|          ========
-========         ||                    ||   | === |          ========
-========         ||   KICKSTART.NVIM   ||   |-----|          ========
-========         ||                    ||   | === |          ========
-========         ||                    ||   |-----|          ========
-========         ||:Tutor              ||   |:::::|          ========
-========         |'-..................-'|   |____o|          ========
-========         `"")----------------(""`   ___________      ========
-========        /::::::::::|  |::::::::::\  \ no mouse \     ========
-========       /:::========|  |==hjkl==:::\  \ required \    ========
-========      '""""""""""""'  '""""""""""""'  '""""""""""'   ========
-========                                                     ========
-=====================================================================
-=====================================================================
-
-What is Kickstart?
-
-  Kickstart.nvim is *not* a distribution.
-
-  Kickstart.nvim is a starting point for your own configuration.
-    The goal is that you can read every line of code, top-to-bottom, understand
-    what your configuration is doing, and modify it to suit your needs.
-
-    Once you've done that, you can start exploring, configuring and tinkering to
-    make Neovim your own! That might mean leaving Kickstart just the way it is for a while
-    or immediately breaking it into modular pieces. It's up to you!
-
-    If you don't know anything about Lua, I recommend taking some time to read through
-    a guide. One possible example which will only take 10-15 minutes:
-      - https://learnxinyminutes.com/docs/lua/
-
-    After understanding a bit more about Lua, you can use `:help lua-guide` as a
-    reference for how Neovim integrates Lua.
-    - :help lua-guide
-    - (or HTML version): https://neovim.io/doc/user/lua-guide.html
-
-Kickstart Guide:
-
-  TODO: The very first thing you should do is to run the command `:Tutor` in Neovim.
-
-    If you don't know what this means, type the following:
-      - <escape key>
-      - :
-      - Tutor
-      - <enter key>
-
-    (If you already know the Neovim basics, you can skip this step.)
-
-  Once you've completed that, you can continue working through **AND READING** the rest
-  of the kickstart init.lua.
-
-  Next, run AND READ `:help`.
-    This will open up a help window with some basic information
-    about reading, navigating and searching the builtin help documentation.
-
-    This should be the first place you go to look when you're stuck or confused
-    with something. It's one of my favorite Neovim features.
-
-    MOST IMPORTANTLY, we provide a keymap "<space>sh" to [s]earch the [h]elp documentation,
-    which is very useful when you're not exactly sure of what you're looking for.
-
-  I have left several `:help X` comments throughout the init.lua
-    These are hints about where to find more information about the relevant settings,
-    plugins or Neovim features used in Kickstart.
-
-   NOTE: Look for lines like this
-
-    Throughout the file. These are for you, the reader, to help you understand what is happening.
-    Feel free to delete them once you know what you're doing, but they should serve as a guide
-    for when you are first encountering a few different constructs in your Neovim config.
-
-If you experience any errors while trying to install kickstart, run `:checkhealth` for more info.
-
-I hope you enjoy your Neovim journey,
-- TJ
-
-P.S. You can delete this when you're done too. It's your config now! :)
---]]
-
 -- ============================================================
 -- SECTION 1: FOUNDATION
 -- Core Neovim settings, leaders, options, basic keymaps, basic autocmds
@@ -98,6 +12,9 @@ do
   vim.g.mapleader = ' '
   vim.g.maplocalleader = ' '
 
+  -- Set `jk` as <Esc> to exit insert mode
+  vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
+
   -- Set to true if you have a Nerd Font installed and selected in the terminal
   vim.g.have_nerd_font = false
 
@@ -110,7 +27,7 @@ do
   vim.o.number = true
   -- You can also add relative line numbers, to help with jumping.
   --  Experiment for yourself to see if you like it!
-  -- vim.o.relativenumber = true
+  vim.o.relativenumber = true
 
   -- Enable mouse mode, can be useful for resizing splits for example!
   vim.o.mouse = 'a'
@@ -441,6 +358,33 @@ do
 
   -- ... and there is more!
   --  Check out: https://github.com/nvim-mini/mini.nvim
+
+
+  -- [[ User Git Config ]]
+  -- Diffview setup and keymaps 
+  vim.pack.add { gh 'sindrets/diffview.nvim' }
+  local diffview = require('diffview').setup({
+    keymaps = {
+      view = {
+        { "n", "q", "<cmd>DiffviewClose<cr>", { desc = "Close Diffview" } },
+      },
+      file_panel = {
+        { "n", "q", "<cmd>DiffviewClose<cr>", { desc = "Close Diffview" } },
+      },
+      file_history_panel = {
+        { "n", "q", "<cmd>DiffviewClose<cr>", { desc = "Close Diffview" } },
+      },
+    },
+  })
+  -- Neogit setup and keymaps
+  vim.pack.add { gh 'NeogitOrg/neogit' }  
+  local neogit = require('neogit')
+  neogit.setup({})
+  vim.keymap.set("n", "<leader>gg", neogit.open, { desc = "Open Neogit" })
+
+  -- Diff the working tree (staged + unstaged changes) against HEAD.
+  --  `:DiffviewOpen` with no args defaults to HEAD vs the working tree.
+  vim.keymap.set("n", "<leader>dd", "<cmd>DiffviewOpen<cr>", { desc = "[D]iffview: working tree vs HEAD" })
 end
 
 -- ============================================================
@@ -448,6 +392,12 @@ end
 -- Telescope setup, keymaps, LSP picker mappings
 -- ============================================================
 do
+  -- [[ Filesystem navigation and manipulation ]]
+  require('mini.files').setup()
+  vim.keymap.set("n", "<leader>e", function()
+    require("mini.files").open()
+  end, { desc = "Open mini.files" })
+
   -- [[ Fuzzy Finder (files, lsp, etc) ]]
   --
   -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -487,12 +437,13 @@ do
   require('telescope').setup {
     -- You can put your default mappings / updates / etc. in here
     --  All the info you're looking for is in `:help telescope.setup()`
-    --
-    -- defaults = {
-    --   mappings = {
-    --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-    --   },
-    -- },
+    defaults = {
+      mappings = {
+        -- i = { ['<c-enter>'] = 'to_fuzzy_refine' },
+        -- In normal mode (hit <Esc> once to enter it), `q` closes the picker.
+        n = { ['q'] = require('telescope.actions').close },
+      },
+    },
     -- pickers = {}
     extensions = {
       ['ui-select'] = { require('telescope.themes').get_dropdown() },
@@ -686,18 +637,9 @@ do
   --  See `:help lsp-config` for information about keys and how to configure
   ---@type table<string, vim.lsp.Config>
   local servers = {
-    -- clangd = {},
-    -- gopls = {},
-    -- pyright = {},
-    -- rust_analyzer = {},
-    --
     -- Some languages (like typescript) have entire language plugins that can be useful:
     --    https://github.com/pmizio/typescript-tools.nvim
-    --
-    -- But for many setups, the LSP (`ts_ls`) will work just fine
-    -- ts_ls = {},
-
-    stylua = {}, -- Used to format Lua code
+    -- But for many setups, the LSP (`ts_ls`) will work just fine.
 
     -- Special Lua Config, as recommended by neovim help docs
     lua_ls = {
@@ -732,7 +674,45 @@ do
         },
       },
     },
+
+    -- Rust
+    rust_analyzer = {},
+
+    -- Go
+    gopls = {},
+
+    -- TypeScript / JavaScript
+    ts_ls = {},
+
+    -- C / C++
+    clangd = {},
+
+    -- CMake
+    cmake = {},
+
+    -- Python (formatting/linting handled by ruff via conform, not pyright)
+    pyright = {},
+
+    -- Config / data languages
+    jsonls = {},
+    yamlls = {},
+    taplo = {}, -- TOML
+    marksman = {}, -- Markdown
   }
+
+  -- Extra tools that are NOT language servers (formatters, linters).
+  --  These are installed via Mason but are not passed to `vim.lsp.enable`.
+  --  Wire them up in the formatting section (conform.nvim) below.
+  local extra_tools = {
+    'stylua', -- Lua formatter
+    'prettierd', -- JS/TS/JSON/YAML/Markdown formatter
+    'ruff', -- Python formatter + linter
+    'clang-format', -- C/C++ formatter
+    'markdownlint', -- Markdown linter (used by kickstart.plugins.lint)
+  }
+  -- NOTE: Debug adapters (codelldb, delve) are intentionally NOT listed here.
+  --  They are owned by `kickstart.plugins.debug` via mason-nvim-dap's own
+  --  `ensure_installed`. Add new debuggers there, not here.
 
   vim.pack.add {
     gh 'neovim/nvim-lspconfig',
@@ -752,9 +732,7 @@ do
   --
   -- You can press `g?` for help in this menu.
   local ensure_installed = vim.tbl_keys(servers or {})
-  vim.list_extend(ensure_installed, {
-    -- You can add other tools here that you want Mason to install
-  })
+  vim.list_extend(ensure_installed, extra_tools)
 
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -788,14 +766,22 @@ do
     default_format_opts = {
       lsp_format = 'fallback', -- Use external formatters if configured below, otherwise use LSP formatting. Set to `false` to disable LSP formatting entirely.
     },
-    -- You can also specify external formatters in here.
+    -- External formatters. Rust/Go are intentionally omitted here so they
+    --  fall back to LSP formatting (rust_analyzer/gopls) via `lsp_format`.
     formatters_by_ft = {
-      -- rust = { 'rustfmt' },
-      -- Conform can also run multiple formatters sequentially
-      -- python = { "isort", "black" },
-      --
-      -- You can use 'stop_after_first' to run the first available formatter from the list
-      -- javascript = { "prettierd", "prettier", stop_after_first = true },
+      lua = { 'stylua' },
+      python = { 'ruff_format' },
+      c = { 'clang-format' },
+      cpp = { 'clang-format' },
+      -- Use 'stop_after_first' to run the first available formatter from the list
+      javascript = { 'prettierd', 'prettier', stop_after_first = true },
+      javascriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+      typescript = { 'prettierd', 'prettier', stop_after_first = true },
+      typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+      json = { 'prettierd', 'prettier', stop_after_first = true },
+      jsonc = { 'prettierd', 'prettier', stop_after_first = true },
+      yaml = { 'prettierd', 'prettier', stop_after_first = true },
+      markdown = { 'prettierd', 'prettier', stop_after_first = true },
     },
   }
 
@@ -960,12 +946,12 @@ do
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug'
-  -- require 'kickstart.plugins.indent_line'
-  -- require 'kickstart.plugins.lint'
-  -- require 'kickstart.plugins.autopairs'
+  require 'kickstart.plugins.debug'
+  require 'kickstart.plugins.indent_line'
+  require 'kickstart.plugins.lint'
+  require 'kickstart.plugins.autopairs'
+  require 'kickstart.plugins.gitsigns'
   -- require 'kickstart.plugins.neo-tree'
-  -- require 'kickstart.plugins.gitsigns' -- adds gitsigns recommended keymaps
 
   -- NOTE: You can add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --

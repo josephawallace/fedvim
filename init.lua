@@ -959,5 +959,13 @@ do
   -- require 'custom.plugins'
 end
 
+-- ============================================================
+-- SECTION 10: PRACTICE / GAMES
+-- vim-be-good — drills for Vim motions (run `:VimBeGood`)
+-- ============================================================
+do
+  vim.pack.add { gh 'ThePrimeagen/vim-be-good' }
+end
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

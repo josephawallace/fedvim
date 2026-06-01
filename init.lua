@@ -16,7 +16,7 @@ do
   vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
 
   -- Set to true if you have a Nerd Font installed and selected in the terminal
-  vim.g.have_nerd_font = false
+  vim.g.have_nerd_font = true
 
   -- [[ Setting options ]]
   --  See `:help vim.o`
@@ -698,6 +698,10 @@ do
 
     -- Python (formatting/linting handled by ruff via conform, not pyright)
     pyright = {},
+
+    -- CSS / Sass / SCSS
+    cssls = {},
+    somesass_ls = {},
 
     -- Config / data languages
     jsonls = {},
